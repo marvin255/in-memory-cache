@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Marvin255\Jwt\InMemoryCache\Tests;
+namespace Marvin255\InMemoryCache\Tests;
 
-use Marvin255\Jwt\InMemoryCache\InMemoryCache;
-use Psr\SimpleCache\InvalidArgumentException;
+use DateInterval;
+use Marvin255\InMemoryCache\InMemoryCache;
 use stdClass;
 
 /**
@@ -44,7 +44,6 @@ class InMemoryCacheTest extends BaseCase
         $default = 'default';
 
         $cache = new InMemoryCache();
-        $cache->set($key, $value, $ttl);
 
         $this->assertSame($default, $cache->get($key, $default));
     }
@@ -57,25 +56,22 @@ class InMemoryCacheTest extends BaseCase
 
         $cache = new InMemoryCache();
         $cache->set($key, $value, $ttl);
-        sleep(1);
+        sleep(2);
 
         $this->assertNull($cache->get($key, null));
     }
 
-    public function testGetIllegalKey(): void
+    public function testSetDateInterval(): void
     {
+        $key = 'test';
+        $value = 'test value';
+        $ttl = new DateInterval('PT1S');
+
         $cache = new InMemoryCache();
+        $cache->set($key, $value, $ttl);
+        sleep(2);
 
-        $this->expectException(InvalidArgumentException::class);
-        $cache->get(true);
-    }
-
-    public function testSetIllegalKey(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->set(true, true);
+        $this->assertNull($cache->get($key, null));
     }
 
     public function testSetMultiple(): void
@@ -87,18 +83,10 @@ class InMemoryCacheTest extends BaseCase
         $ttl = 60;
 
         $cache = new InMemoryCache();
-        $cache->setMultiple([$key => $value, $key1 => $value], $ttl);
+        $cache->setMultiple([$key => $value, $key1 => $value1], $ttl);
 
         $this->assertSame($value, $cache->get($key));
         $this->assertSame($value1, $cache->get($key1));
-    }
-
-    public function testSetMultipleIllegalKey(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->setMultiple(true);
     }
 
     public function testGetMultiple(): void
@@ -121,16 +109,8 @@ class InMemoryCacheTest extends BaseCase
                 $key1 => $value1,
                 $key => $value,
             ],
-            $cache->getMultiple([$key2, $key1, $key])
+            $cache->getMultiple([$key2, $key1, $key], $default)
         );
-    }
-
-    public function testGetMultipleIllegalKey(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->getMultiple(true);
     }
 
     public function testHas(): void
@@ -157,12 +137,17 @@ class InMemoryCacheTest extends BaseCase
         $this->assertFalse($cache->has('unexisted'));
     }
 
-    public function testHasIllegalKey(): void
+    public function testHasExpired(): void
     {
-        $cache = new InMemoryCache();
+        $key = 'test';
+        $value = 'test value';
+        $ttl = 1;
 
-        $this->expectException(InvalidArgumentException::class);
-        $cache->has(true);
+        $cache = new InMemoryCache();
+        $cache->set($key, $value, $ttl);
+        sleep(2);
+
+        $this->assertFalse($cache->has($key));
     }
 
     public function testDelete(): void
@@ -176,14 +161,6 @@ class InMemoryCacheTest extends BaseCase
         $cache->delete($key);
 
         $this->assertFalse($cache->has($key));
-    }
-
-    public function testDeleteIllegalKey(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->delete(true);
     }
 
     public function testDeleteMultiple(): void
@@ -207,14 +184,6 @@ class InMemoryCacheTest extends BaseCase
         $this->assertFalse($cache->has($key2));
     }
 
-    public function testDeleteMultipleIllegalKey(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->deleteMultiple(true);
-    }
-
     public function testClear(): void
     {
         $key = 'test';
@@ -230,5 +199,45 @@ class InMemoryCacheTest extends BaseCase
 
         $this->assertFalse($cache->has($key));
         $this->assertFalse($cache->has($key1));
+    }
+
+    public function testStackSize(): void
+    {
+        $key = 'test';
+        $value = 'test value';
+        $key1 = 'test_1';
+        $value1 = 'test value 1';
+        $key2 = 'test_2';
+        $value2 = 'test value 2';
+
+        $cache = new InMemoryCache(2, 60);
+        $cache->set($key, $value);
+        $cache->set($key1, $value1);
+        $cache->get($key1);
+        $cache->set($key2, $value2);
+
+        $this->assertFalse($cache->has($key), 'Item that cleared from cache');
+        $this->assertTrue($cache->has($key1), 'Item that was selected once');
+        $this->assertTrue($cache->has($key2), 'New item');
+    }
+
+    public function testStackSizeTTL(): void
+    {
+        $key = 'test';
+        $value = 'test value';
+        $key1 = 'test_1';
+        $value1 = 'test value 1';
+        $key2 = 'test_2';
+        $value2 = 'test value 2';
+
+        $cache = new InMemoryCache(2, 60);
+        $cache->set($key, $value, 1);
+        $cache->set($key1, $value1);
+        sleep(2);
+        $cache->set($key2, $value2);
+
+        $this->assertFalse($cache->has($key), 'Item that was expired');
+        $this->assertTrue($cache->has($key1), 'Common item');
+        $this->assertTrue($cache->has($key2), 'New item');
     }
 }
