@@ -1,4 +1,4 @@
-name: marvin255_in_memory-cache
+name: marvin255_in_memory_cache
 
 on:
   push:
