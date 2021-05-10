@@ -141,10 +141,66 @@ class InMemoryCache implements CacheInterface
     }
 
     /**
+     * Checks that cache key is valid and returns it as a string.
+     *
+     * @param mixed $key
+     *
+     * @return string
+     */
+    private function checkAndUnifyKey($key): string
+    {
+        if (!\is_string($key)) {
+            $message = 'Cache key must be a string instance.';
+            throw new InvalidArgumentException($message);
+        }
+
+        return $key;
+    }
+
+    /**
+     * Checks that cache keys is an iterable object.
+     *
+     * @param mixed $keys
+     *
+     * @return iterable
+     */
+    private function checkAndUnifyKeys($keys): iterable
+    {
+        if (!is_iterable($keys)) {
+            $message = 'Keys must be an iterable instance.';
+            throw new InvalidArgumentException($message);
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Counts time before which cached item is valid.
+     *
+     * @param mixed $ttl
+     *
+     * @return int
+     */
+    private function createValidTill($ttl): int
+    {
+        $validTill = time();
+
+        if ($ttl === null) {
+            $validTill += $this->defaultTTL;
+        } elseif ($ttl instanceof DateInterval) {
+            $validTill += $ttl->s;
+        } else {
+            $validTill += (int) $ttl;
+        }
+
+        return $validTill;
+    }
+
+    /**
      * Removes one item from stack to insert new one.
      *
      * Tries to remove expired item if there is some.
-     * In other case removes  item with the least select count.
+     * In other case removes item with the least select count.
      */
     private function clearStack(): void
     {
@@ -165,61 +221,5 @@ class InMemoryCache implements CacheInterface
         if ($keyToRemove) {
             unset($this->stack[$keyToRemove]);
         }
-    }
-
-    /**
-     * Check that cache key is valid item and returns it as a string.
-     *
-     * @param mixed $key
-     *
-     * @return string
-     */
-    private function checkAndUnifyKey($key): string
-    {
-        if (!is_scalar($key)) {
-            $message = 'Cache key must be a string instance.';
-            throw new InvalidArgumentException($message);
-        }
-
-        return (string) $key;
-    }
-
-    /**
-     * Check that cache keys item is a iterable object.
-     *
-     * @param mixed $keys
-     *
-     * @return iterable
-     */
-    private function checkAndUnifyKeys($keys): iterable
-    {
-        if (!is_iterable($keys)) {
-            $message = 'Keys must be an iterable instance.';
-            throw new InvalidArgumentException($message);
-        }
-
-        return $keys;
-    }
-
-    /**
-     * Counts time untill cached item is valid.
-     *
-     * @param mixed $ttl
-     *
-     * @return int
-     */
-    private function createValidTill($ttl): int
-    {
-        $validTill = time();
-
-        if ($ttl === null) {
-            $validTill += $this->defaultTTL;
-        } elseif ($ttl instanceof DateInterval) {
-            $validTill += $ttl->s;
-        } else {
-            $validTill += (int) $ttl;
-        }
-
-        return $validTill;
     }
 }
