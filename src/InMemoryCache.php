@@ -204,7 +204,6 @@ class InMemoryCache implements CacheInterface
      */
     private function clearStack(): void
     {
-        $now = time();
         $leastSelectCount = null;
         $keyToRemove = null;
 
