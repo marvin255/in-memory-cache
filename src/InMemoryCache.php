@@ -209,7 +209,7 @@ class InMemoryCache implements CacheInterface
         $keyToRemove = null;
 
         foreach ($this->stack as $key => $item) {
-            if ($item->validTill < $now) {
+            if (!$item->isValid()) {
                 $keyToRemove = $key;
                 break;
             } elseif ($leastSelectCount === null || $leastSelectCount > $item->selectCount) {
