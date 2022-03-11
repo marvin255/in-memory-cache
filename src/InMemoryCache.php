@@ -34,7 +34,7 @@ class InMemoryCache implements CacheInterface
     {
         if (!isset($this->stack[$key])) {
             return $default;
-        } elseif (!$this->stack[$key]->isValid()) {
+        } elseif (!$this->isItemValid($this->stack[$key])) {
             unset($this->stack[$key]);
 
             return $default;
@@ -122,7 +122,7 @@ class InMemoryCache implements CacheInterface
      */
     public function has(string $key): bool
     {
-        return isset($this->stack[$key]) && $this->stack[$key]->isValid();
+        return isset($this->stack[$key]) && $this->isItemValid($this->stack[$key]);
     }
 
     /**
@@ -159,7 +159,7 @@ class InMemoryCache implements CacheInterface
         $keyToRemove = null;
 
         foreach ($this->stack as $key => $item) {
-            if (!$item->isValid()) {
+            if (!$this->isItemValid($item)) {
                 $keyToRemove = $key;
                 break;
             } elseif ($leastSelectCount === null || $leastSelectCount > $item->getSelectCount()) {
@@ -171,5 +171,17 @@ class InMemoryCache implements CacheInterface
         if ($keyToRemove) {
             unset($this->stack[$keyToRemove]);
         }
+    }
+
+    /**
+     * Checks that item valid and can be returned.
+     *
+     * @param CachedItem $item
+     *
+     * @return bool
+     */
+    private function isItemValid(CachedItem $item): bool
+    {
+        return $item->getValidTill() >= time();
     }
 }
