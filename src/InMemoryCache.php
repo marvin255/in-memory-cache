@@ -40,9 +40,7 @@ class InMemoryCache implements CacheInterface
             return $default;
         }
 
-        ++$this->stack[$key]->selectCount;
-
-        return $this->stack[$key]->payload;
+        return $this->stack[$key]->getPayload();
     }
 
     /**
@@ -164,9 +162,9 @@ class InMemoryCache implements CacheInterface
             if (!$item->isValid()) {
                 $keyToRemove = $key;
                 break;
-            } elseif ($leastSelectCount === null || $leastSelectCount > $item->selectCount) {
+            } elseif ($leastSelectCount === null || $leastSelectCount > $item->getSelectCount()) {
                 $keyToRemove = $key;
-                $leastSelectCount = $item->selectCount;
+                $leastSelectCount = $item->getSelectCount();
             }
         }
 
