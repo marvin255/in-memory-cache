@@ -6,7 +6,6 @@ namespace Marvin255\InMemoryCache\Tests;
 
 use DateInterval;
 use Marvin255\InMemoryCache\InMemoryCache;
-use Marvin255\InMemoryCache\InvalidArgumentException;
 use stdClass;
 
 /**
@@ -62,17 +61,6 @@ class InMemoryCacheTest extends BaseCase
         $this->assertNull($cache->get($key, null));
     }
 
-    /**
-     * @psalm-suppress InvalidScalarArgument
-     */
-    public function testGetKeyTypeException(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->get(true);
-    }
-
     public function testSetDateInterval(): void
     {
         $key = 'test';
@@ -84,17 +72,6 @@ class InMemoryCacheTest extends BaseCase
         sleep(2);
 
         $this->assertNull($cache->get($key, null));
-    }
-
-    /**
-     * @psalm-suppress InvalidScalarArgument
-     */
-    public function testSetKeyTypeException(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->set(true, 'test');
     }
 
     public function testSetMultiple(): void
@@ -110,17 +87,6 @@ class InMemoryCacheTest extends BaseCase
 
         $this->assertSame($value, $cache->get($key));
         $this->assertSame($value1, $cache->get($key1));
-    }
-
-    /**
-     * @psalm-suppress InvalidArgument
-     */
-    public function testSetMultipleKeysTypeException(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->setMultiple(true);
     }
 
     public function testGetMultiple(): void
@@ -145,17 +111,6 @@ class InMemoryCacheTest extends BaseCase
             ],
             $cache->getMultiple([$key2, $key1, $key], $default)
         );
-    }
-
-    /**
-     * @psalm-suppress InvalidArgument
-     */
-    public function testGetMultipleKeysTypeException(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->getMultiple(true);
     }
 
     public function testHas(): void
@@ -195,17 +150,6 @@ class InMemoryCacheTest extends BaseCase
         $this->assertFalse($cache->has($key));
     }
 
-    /**
-     * @psalm-suppress InvalidScalarArgument
-     */
-    public function testHasKeyTypeException(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->has(true);
-    }
-
     public function testDelete(): void
     {
         $key = 'test';
@@ -217,17 +161,6 @@ class InMemoryCacheTest extends BaseCase
         $cache->delete($key);
 
         $this->assertFalse($cache->has($key));
-    }
-
-    /**
-     * @psalm-suppress InvalidScalarArgument
-     */
-    public function testDeleteKeyTypeException(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->delete(true);
     }
 
     public function testDeleteMultiple(): void
@@ -249,17 +182,6 @@ class InMemoryCacheTest extends BaseCase
         $this->assertFalse($cache->has($key));
         $this->assertSame($value1, $cache->get($key1));
         $this->assertFalse($cache->has($key2));
-    }
-
-    /**
-     * @psalm-suppress InvalidArgument
-     */
-    public function testDeleteMultipleKeysTypeException(): void
-    {
-        $cache = new InMemoryCache();
-
-        $this->expectException(InvalidArgumentException::class);
-        $cache->deleteMultiple(true);
     }
 
     public function testClear(): void

@@ -9,32 +9,32 @@ namespace Marvin255\InMemoryCache;
  */
 class CachedItem
 {
-    /**
-     * @var mixed
-     */
-    public $payload = null;
+    private mixed $payload;
 
-    public int $validTill = 0;
+    private int $validTill;
 
-    public int $selectCount = 0;
+    private int $selectCount = 0;
 
-    /**
-     * @param mixed $payload
-     * @param int   $validTill
-     */
-    public function __construct($payload, int $validTill)
+    public function __construct(mixed $payload, int $validTill)
     {
         $this->payload = $payload;
         $this->validTill = $validTill;
     }
 
-    /**
-     * Returns true if item still valid.
-     *
-     * @return bool
-     */
     public function isValid(): bool
     {
         return $this->validTill >= time();
+    }
+
+    public function getSelectCount(): int
+    {
+        return $this->selectCount;
+    }
+
+    public function getPayload(): mixed
+    {
+        ++$this->selectCount;
+
+        return $this->payload;
     }
 }

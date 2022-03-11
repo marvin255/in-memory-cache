@@ -30,35 +30,29 @@ class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
-        $unifiedKey = $this->checkAndUnifyKey($key);
-
-        if (!isset($this->stack[$unifiedKey])) {
+        if (!isset($this->stack[$key])) {
             return $default;
-        } elseif (!$this->stack[$unifiedKey]->isValid()) {
-            unset($this->stack[$unifiedKey]);
+        } elseif (!$this->stack[$key]->isValid()) {
+            unset($this->stack[$key]);
 
             return $default;
         }
 
-        ++$this->stack[$unifiedKey]->selectCount;
-
-        return $this->stack[$unifiedKey]->payload;
+        return $this->stack[$key]->getPayload();
     }
 
     /**
      * {@inheritDoc}
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool
     {
-        $unifiedKey = $this->checkAndUnifyKey($key);
-
         if (\count($this->stack) >= $this->stackSize) {
             $this->clearStack();
         }
 
-        $this->stack[$unifiedKey] = new CachedItem(
+        $this->stack[$key] = new CachedItem(
             $value,
             $this->createValidTill($ttl)
         );
@@ -69,10 +63,9 @@ class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
-        $unifiedKey = $this->checkAndUnifyKey($key);
-        unset($this->stack[$unifiedKey]);
+        unset($this->stack[$key]);
 
         return true;
     }
@@ -80,7 +73,7 @@ class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function clear()
+    public function clear(): bool
     {
         $this->stack = [];
 
@@ -90,12 +83,10 @@ class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function getMultiple($keys, $default = null)
+    public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
-        $unifiedKeys = $this->checkAndUnifyKeys($keys);
-
         $result = [];
-        foreach ($unifiedKeys as $key) {
+        foreach ($keys as $key) {
             $result[$key] = $this->get($key, $default);
         }
 
@@ -105,12 +96,10 @@ class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function setMultiple($values, $ttl = null)
+    public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
     {
-        $unifiedValues = $this->checkAndUnifyKeys($values);
-
-        foreach ($unifiedValues as $key => $value) {
-            $this->set($key, $value, $ttl);
+        foreach ($values as $key => $value) {
+            $this->set((string) $key, $value, $ttl);
         }
 
         return true;
@@ -119,11 +108,9 @@ class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteMultiple($keys)
+    public function deleteMultiple(iterable $keys): bool
     {
-        $unifiedKeys = $this->checkAndUnifyKeys($keys);
-
-        foreach ($unifiedKeys as $key) {
+        foreach ($keys as $key) {
             $this->delete($key);
         }
 
@@ -133,55 +120,19 @@ class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function has($key)
+    public function has(string $key): bool
     {
-        $unifiedKey = $this->checkAndUnifyKey($key);
-
-        return isset($this->stack[$unifiedKey]) && $this->stack[$unifiedKey]->isValid();
-    }
-
-    /**
-     * Checks that cache key is valid and returns it as a string.
-     *
-     * @param mixed $key
-     *
-     * @return string
-     */
-    private function checkAndUnifyKey($key): string
-    {
-        if (!\is_string($key)) {
-            $message = 'Cache key must be a string instance.';
-            throw new InvalidArgumentException($message);
-        }
-
-        return $key;
-    }
-
-    /**
-     * Checks that cache keys is an iterable object.
-     *
-     * @param mixed $keys
-     *
-     * @return iterable
-     */
-    private function checkAndUnifyKeys($keys): iterable
-    {
-        if (!is_iterable($keys)) {
-            $message = 'Keys must be an iterable instance.';
-            throw new InvalidArgumentException($message);
-        }
-
-        return $keys;
+        return isset($this->stack[$key]) && $this->stack[$key]->isValid();
     }
 
     /**
      * Counts time before which cached item is valid.
      *
-     * @param mixed $ttl
+     * @param int|DateInterval|null $ttl
      *
      * @return int
      */
-    private function createValidTill($ttl): int
+    private function createValidTill(null|int|DateInterval $ttl): int
     {
         $validTill = time();
 
@@ -190,7 +141,7 @@ class InMemoryCache implements CacheInterface
         } elseif ($ttl instanceof DateInterval) {
             $validTill += $ttl->s;
         } else {
-            $validTill += (int) $ttl;
+            $validTill += $ttl;
         }
 
         return $validTill;
@@ -211,9 +162,9 @@ class InMemoryCache implements CacheInterface
             if (!$item->isValid()) {
                 $keyToRemove = $key;
                 break;
-            } elseif ($leastSelectCount === null || $leastSelectCount > $item->selectCount) {
+            } elseif ($leastSelectCount === null || $leastSelectCount > $item->getSelectCount()) {
                 $keyToRemove = $key;
-                $leastSelectCount = $item->selectCount;
+                $leastSelectCount = $item->getSelectCount();
             }
         }
 
