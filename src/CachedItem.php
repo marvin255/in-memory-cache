@@ -21,9 +21,9 @@ class CachedItem
         $this->validTill = $validTill;
     }
 
-    public function isValid(): bool
+    public function getValidTill(): int
     {
-        return $this->validTill >= time();
+        return $this->validTill;
     }
 
     public function getSelectCount(): int
