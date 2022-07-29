@@ -6,6 +6,7 @@ namespace Marvin255\InMemoryCache\Tests;
 
 use DateInterval;
 use Marvin255\InMemoryCache\InMemoryCache;
+use Marvin255\InMemoryCache\InvalidArgumentException;
 use stdClass;
 
 /**
@@ -13,6 +14,18 @@ use stdClass;
  */
 class InMemoryCacheTest extends BaseCase
 {
+    public function testConstructStackSize(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new InMemoryCache(0, 100);
+    }
+
+    public function testConstructDefaultTTL(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new InMemoryCache(100, 0);
+    }
+
     public function testGet(): void
     {
         $key = 'test';

@@ -23,6 +23,13 @@ class InMemoryCache implements CacheInterface
 
     public function __construct(int $stackSize = 1000, int $defaultTTL = 60)
     {
+        if ($stackSize < 1) {
+            throw new InvalidArgumentException('Stack size must be greater than 0');
+        }
+        if ($defaultTTL < 1) {
+            throw new InvalidArgumentException('Default TTL must be greater than 0');
+        }
+
         $this->stackSize = $stackSize;
         $this->defaultTTL = $defaultTTL;
     }
