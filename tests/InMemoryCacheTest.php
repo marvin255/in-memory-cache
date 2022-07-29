@@ -17,13 +17,13 @@ class InMemoryCacheTest extends BaseCase
     public function testConstructStackSize(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        new InMemoryCache(0, 100);
+        new InMemoryCache(0, 1);
     }
 
     public function testConstructDefaultTTL(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        new InMemoryCache(100, 0);
+        new InMemoryCache(1, 0);
     }
 
     public function testGet(): void
@@ -32,7 +32,7 @@ class InMemoryCacheTest extends BaseCase
         $value = 'test value';
         $ttl = 60;
 
-        $cache = new InMemoryCache();
+        $cache = new InMemoryCache(1, 1);
         $cache->set($key, $value, $ttl);
 
         $this->assertSame($value, $cache->get($key));
