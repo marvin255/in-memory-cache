@@ -12,9 +12,9 @@ use Psr\SimpleCache\CacheInterface;
  */
 class InMemoryCache implements CacheInterface
 {
-    private int $stackSize;
+    private readonly int $stackSize;
 
-    private int $defaultTTL;
+    private readonly int $defaultTTL;
 
     /**
      * @var CachedItem[]
