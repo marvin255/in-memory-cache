@@ -32,15 +32,11 @@ class InMemoryCache implements CacheInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        if (!isset($this->stack[$key])) {
-            return $default;
-        } elseif (!$this->isItemValid($this->stack[$key])) {
-            unset($this->stack[$key]);
+        $item = $this->stack[$key] ?? null;
 
-            return $default;
-        }
-
-        return $this->stack[$key]->getPayload();
+        return $item !== null && $this->isItemValid($item)
+            ? $item->getPayload()
+            : $default;
     }
 
     /**
@@ -52,10 +48,8 @@ class InMemoryCache implements CacheInterface
             $this->clearStack();
         }
 
-        $this->stack[$key] = new CachedItem(
-            $value,
-            $this->createValidTill($ttl)
-        );
+        $validTill = $this->createValidTill($ttl);
+        $this->stack[$key] = new CachedItem($value, $validTill);
 
         return true;
     }
