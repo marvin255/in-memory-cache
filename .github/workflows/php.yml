@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php-versions: ['8.0', '8.1']
+        php-versions: ['8.1']
     steps:
     - uses: actions/checkout@v2
     - name: Install PHP
@@ -35,7 +35,9 @@ jobs:
     - name: Install dependencies
       if: steps.composer-cache.outputs.cache-hit != 'true'
       run: composer install --prefer-dist --no-progress --no-suggest
-    - name: Run test suite
-      run: composer run-script test
     - name: Run linters
       run: composer run-script linter
+    - name: Run test suite
+      run: composer run-script test
+    - name: Run infection testing
+      run: composer run-script infection

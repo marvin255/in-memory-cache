@@ -13,11 +13,14 @@
     </projectFiles>
 
     <issueHandlers>
-        <PropertyNotSetInConstructor errorLevel="suppress"/>
+        <PropertyNotSetInConstructor>
+            <errorLevel type="suppress">
+                <directory name="./tests"/>
+            </errorLevel>
+        </PropertyNotSetInConstructor>
         <MixedAssignment errorLevel="suppress"/>
     </issueHandlers>
 
     <plugins>
-        <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
     </plugins>
 </psalm>

@@ -17,9 +17,9 @@ use Psr\SimpleCache\CacheInterface;
  */
 class CompositeCache implements CacheInterface
 {
-    private CacheInterface $lightCache;
+    private readonly CacheInterface $lightCache;
 
-    private CacheInterface $heavyCache;
+    private readonly CacheInterface $heavyCache;
 
     public function __construct(CacheInterface $lightCache, CacheInterface $heavyCache)
     {

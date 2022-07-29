@@ -1,0 +1,29 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "logs": {
+        "text": "infection.log"
+    },
+    "mutators": {
+        "@default": true,
+        "DecrementInteger": {
+            "ignore": [
+                "Marvin255\\InMemoryCache\\InMemoryCache::__construct"
+            ]
+        },
+        "IncrementInteger": {
+            "ignore": [
+                "Marvin255\\InMemoryCache\\InMemoryCache::__construct"
+            ]
+        },
+        "GreaterThanOrEqualTo": {
+            "ignore": [
+                "Marvin255\\InMemoryCache\\InMemoryCache::isItemValid"
+            ]
+        }
+    }
+}

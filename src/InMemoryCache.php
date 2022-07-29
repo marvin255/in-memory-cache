@@ -12,9 +12,9 @@ use Psr\SimpleCache\CacheInterface;
  */
 class InMemoryCache implements CacheInterface
 {
-    private int $stackSize;
+    private readonly int $stackSize;
 
-    private int $defaultTTL;
+    private readonly int $defaultTTL;
 
     /**
      * @var CachedItem[]
@@ -23,6 +23,13 @@ class InMemoryCache implements CacheInterface
 
     public function __construct(int $stackSize = 1000, int $defaultTTL = 60)
     {
+        if ($stackSize < 1) {
+            throw new InvalidArgumentException('Stack size must be greater than 0');
+        }
+        if ($defaultTTL < 1) {
+            throw new InvalidArgumentException('Default TTL must be greater than 0');
+        }
+
         $this->stackSize = $stackSize;
         $this->defaultTTL = $defaultTTL;
     }
@@ -32,15 +39,11 @@ class InMemoryCache implements CacheInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        if (!isset($this->stack[$key])) {
-            return $default;
-        } elseif (!$this->isItemValid($this->stack[$key])) {
-            unset($this->stack[$key]);
+        $item = $this->stack[$key] ?? null;
 
-            return $default;
-        }
-
-        return $this->stack[$key]->getPayload();
+        return $item !== null && $this->isItemValid($item)
+            ? $item->getPayload()
+            : $default;
     }
 
     /**
@@ -52,10 +55,8 @@ class InMemoryCache implements CacheInterface
             $this->clearStack();
         }
 
-        $this->stack[$key] = new CachedItem(
-            $value,
-            $this->createValidTill($ttl)
-        );
+        $validTill = $this->createValidTill($ttl);
+        $this->stack[$key] = new CachedItem($value, $validTill);
 
         return true;
     }

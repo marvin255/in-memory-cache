@@ -9,11 +9,11 @@ namespace Marvin255\InMemoryCache;
  */
 class CachedItem
 {
-    private mixed $payload;
+    public readonly mixed $payload;
 
-    private int $validTill;
+    public readonly int $validTill;
 
-    private int $selectCount = 0;
+    public int $selectCount = 0;
 
     public function __construct(mixed $payload, int $validTill)
     {
