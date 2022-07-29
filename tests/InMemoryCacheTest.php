@@ -115,7 +115,7 @@ class InMemoryCacheTest extends BaseCase
         $this->assertTrue($res);
     }
 
-    public function testSetMultipleIntKey(): void
+    public function testSetMultipleIntegerKey(): void
     {
         $key = 'test';
         $value = 'test value';
