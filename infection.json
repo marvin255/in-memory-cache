@@ -19,6 +19,11 @@
             "ignore": [
                 "Marvin255\\InMemoryCache\\InMemoryCache::__construct"
             ]
+        },
+        "GreaterThanOrEqualTo": {
+            "ignore": [
+                "Marvin255\\InMemoryCache\\InMemoryCache::isItemValid"
+            ]
         }
     }
 }
