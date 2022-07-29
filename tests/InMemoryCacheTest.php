@@ -115,6 +115,22 @@ class InMemoryCacheTest extends BaseCase
         $this->assertTrue($res);
     }
 
+    public function testSetMultipleIntKey(): void
+    {
+        $key = 'test';
+        $value = 'test value';
+        $key1 = 10;
+        $value1 = 'test value 1';
+        $ttl = 60;
+
+        $cache = new InMemoryCache();
+        $res = $cache->setMultiple([$key => $value, $key1 => $value1], $ttl);
+
+        $this->assertSame($value, $cache->get($key));
+        $this->assertSame($value1, $cache->get((string) $key1));
+        $this->assertTrue($res);
+    }
+
     public function testGetMultiple(): void
     {
         $key = 'test';
