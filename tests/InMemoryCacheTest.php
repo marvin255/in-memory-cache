@@ -61,7 +61,20 @@ class InMemoryCacheTest extends BaseCase
         $this->assertNull($cache->get($key, null));
     }
 
-    public function testSetDateInterval(): void
+    public function testGetDateInterval(): void
+    {
+        $key = 'test';
+        $value = 'test value';
+        $ttl = new DateInterval('PT10S');
+
+        $cache = new InMemoryCache();
+        $cache->set($key, $value, $ttl);
+        $res = $cache->get($key);
+
+        $this->assertSame($value, $res);
+    }
+
+    public function testGetAfterDateInterval(): void
     {
         $key = 'test';
         $value = 'test value';
@@ -78,7 +91,7 @@ class InMemoryCacheTest extends BaseCase
     {
         $key = 'test';
         $value = 'test value';
-        $ttl = new DateInterval('PT1S');
+        $ttl = 10;
 
         $cache = new InMemoryCache();
         $res = $cache->set($key, $value, $ttl);
@@ -254,6 +267,27 @@ class InMemoryCacheTest extends BaseCase
 
         $this->assertFalse($cache->has($key), 'Item that was expired');
         $this->assertTrue($cache->has($key1), 'Common item');
+        $this->assertTrue($cache->has($key2), 'New item');
+    }
+
+    public function testStackSizeUseFirstOneToReplace(): void
+    {
+        $key = 'test';
+        $value = 'test value';
+        $key1 = 'test_1';
+        $value1 = 'test value 1';
+        $key2 = 'test_2';
+        $value2 = 'test value 2';
+
+        $cache = new InMemoryCache(2, 60);
+        $cache->set($key, $value);
+        $cache->get($key);
+        $cache->set($key1, $value1);
+        $cache->get($key1);
+        $cache->set($key2, $value2);
+
+        $this->assertFalse($cache->has($key), 'Item that cleared from cache');
+        $this->assertTrue($cache->has($key1), 'Item that was selected once');
         $this->assertTrue($cache->has($key2), 'New item');
     }
 }
