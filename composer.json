@@ -13,7 +13,8 @@
     "friendsofphp/php-cs-fixer": "^3.0",
     "sebastian/phpcpd": "^6.0",
     "vimeo/psalm": "^4.0",
-    "psalm/plugin-phpunit": "^0.16"
+    "psalm/plugin-phpunit": "^0.16",
+    "infection/infection": "^0.26.13"
   },
   "autoload": {
     "psr-4": {
@@ -39,6 +40,14 @@
         "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php -v --dry-run --stop-on-violation --allow-risky=yes",
         "vendor/bin/phpcpd ./ --exclude vendor --exclude docker",
         "vendor/bin/psalm --show-info=true --php-version=$(php -r \"echo phpversion();\")"
+    ],
+    "infection": [
+      "vendor/bin/infection --min-msi=100 --min-covered-msi=100 --threads=4"
     ]
+  },
+  "config": {
+    "allow-plugins": {
+      "infection/extension-installer": true
+    }
   }
 }
