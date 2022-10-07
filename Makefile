@@ -32,3 +32,9 @@ coverage: ## Run tests with coverage
 
 infection: ## Run infection testing
 	$(composer_bin) infection
+
+release: ## Run all preparations before release
+	$(composer_bin) fixer
+	$(composer_bin) linter
+	$(composer_bin) test
+	$(composer_bin) infection
