@@ -10,7 +10,7 @@ use Psr\SimpleCache\CacheInterface;
 /**
  * Simple PSR-16 implementation that uses internal array.
  */
-class InMemoryCache implements CacheInterface
+final class InMemoryCache implements CacheInterface
 {
     private readonly int $stackSize;
 

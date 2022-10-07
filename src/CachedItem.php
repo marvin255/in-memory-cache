@@ -7,13 +7,13 @@ namespace Marvin255\InMemoryCache;
 /**
  * DTO to store item in the cache.
  */
-class CachedItem
+final class CachedItem
 {
-    public readonly mixed $payload;
+    private readonly mixed $payload;
 
-    public readonly int $validTill;
+    private readonly int $validTill;
 
-    public int $selectCount = 0;
+    private int $selectCount = 0;
 
     public function __construct(mixed $payload, int $validTill)
     {
