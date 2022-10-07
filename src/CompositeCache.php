@@ -15,7 +15,7 @@ use Psr\SimpleCache\CacheInterface;
  * Composite cache tries to find data in the light cache and if there is no data
  * in light cache makes a request for heavy cache.
  */
-class CompositeCache implements CacheInterface
+final class CompositeCache implements CacheInterface
 {
     private readonly CacheInterface $lightCache;
 
