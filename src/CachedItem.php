@@ -6,6 +6,8 @@ namespace Marvin255\InMemoryCache;
 
 /**
  * DTO to store item in the cache.
+ *
+ * @internal
  */
 final class CachedItem
 {
