@@ -16,7 +16,7 @@ final class InMemoryCache implements CacheInterface
     private readonly int $defaultTTL;
 
     /**
-     * @var CachedItem[]
+     * @var array<string, CachedItem>
      */
     private array $stack = [];
 
