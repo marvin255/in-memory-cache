@@ -176,7 +176,7 @@ final class InMemoryCache implements CacheInterface
      */
     private function isItemValid(CachedItem $item): bool
     {
-        return $item->containsData() && $item->getValidTill() >= $this->getCurrentTimestamp();
+        return $item->getValidTill() >= $this->getCurrentTimestamp();
     }
 
     /**
