@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Marvin255\InMemoryCache\Tests;
 
-use DateInterval;
 use Marvin255\InMemoryCache\InMemoryCache;
 use Marvin255\InMemoryCache\InvalidArgumentException;
-use stdClass;
 
 /**
  * @internal
@@ -41,7 +39,7 @@ class InMemoryCacheTest extends BaseCase
     public function testGetObject(): void
     {
         $key = 'test';
-        $value = new stdClass();
+        $value = new \stdClass();
         $value->test = 'test value';
         $ttl = 60;
 
@@ -78,7 +76,7 @@ class InMemoryCacheTest extends BaseCase
     {
         $key = 'test';
         $value = 'test value';
-        $ttl = new DateInterval('PT10S');
+        $ttl = new \DateInterval('PT10S');
 
         $cache = new InMemoryCache();
         $cache->set($key, $value, $ttl);
@@ -91,7 +89,7 @@ class InMemoryCacheTest extends BaseCase
     {
         $key = 'test';
         $value = 'test value';
-        $ttl = new DateInterval('PT1S');
+        $ttl = new \DateInterval('PT1S');
 
         $cache = new InMemoryCache();
         $cache->set($key, $value, $ttl);

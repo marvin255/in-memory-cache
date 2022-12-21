@@ -37,4 +37,9 @@ final class CachedItem
 
         return $this->payload;
     }
+
+    public function containsData(): bool
+    {
+        return true;
+    }
 }
