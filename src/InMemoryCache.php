@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Marvin255\InMemoryCache;
 
-use DateInterval;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -17,7 +16,7 @@ final class InMemoryCache implements CacheInterface
     private readonly int $defaultTTL;
 
     /**
-     * @var CachedItem[]
+     * @var array<string, CachedItem>
      */
     private array $stack = [];
 
@@ -49,7 +48,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
         if (\count($this->stack) >= $this->stackSize) {
             $this->clearStack();
@@ -97,7 +96,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
+    public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
     {
         foreach ($values as $key => $value) {
             $this->set((string) $key, $value, $ttl);
@@ -128,18 +127,14 @@ final class InMemoryCache implements CacheInterface
 
     /**
      * Counts time before which cached item is valid.
-     *
-     * @param int|DateInterval|null $ttl
-     *
-     * @return int
      */
-    private function createValidTill(null|int|DateInterval $ttl): int
+    private function createValidTill(null|int|\DateInterval $ttl): int
     {
-        $validTill = time();
+        $validTill = $this->getCurrentTimestamp();
 
         if ($ttl === null) {
             $validTill += $this->defaultTTL;
-        } elseif ($ttl instanceof DateInterval) {
+        } elseif ($ttl instanceof \DateInterval) {
             $validTill += $ttl->s;
         } else {
             $validTill += $ttl;
@@ -156,16 +151,18 @@ final class InMemoryCache implements CacheInterface
      */
     private function clearStack(): void
     {
-        $leastSelectCount = null;
+        $leastScore = null;
         $keyToRemove = null;
 
         foreach ($this->stack as $key => $item) {
             if (!$this->isItemValid($item)) {
                 $keyToRemove = $key;
                 break;
-            } elseif ($leastSelectCount === null || $leastSelectCount > $item->getSelectCount()) {
+            }
+            $score = $this->calculateItemSortScore($item);
+            if ($leastScore === null || $leastScore > $score) {
                 $keyToRemove = $key;
-                $leastSelectCount = $item->getSelectCount();
+                $leastScore = $score;
             }
         }
 
@@ -176,13 +173,25 @@ final class InMemoryCache implements CacheInterface
 
     /**
      * Checks that item valid and can be returned.
-     *
-     * @param CachedItem $item
-     *
-     * @return bool
      */
     private function isItemValid(CachedItem $item): bool
     {
-        return $item->getValidTill() >= time();
+        return $item->getValidTill() >= $this->getCurrentTimestamp();
+    }
+
+    /**
+     * Calculates score for item. Item with the least score will be removed in a case when stack is full.
+     */
+    private function calculateItemSortScore(CachedItem $item): int
+    {
+        return $item->getSelectCount();
+    }
+
+    /**
+     * Returns current timestamp.
+     */
+    private function getCurrentTimestamp(): int
+    {
+        return time();
     }
 }
