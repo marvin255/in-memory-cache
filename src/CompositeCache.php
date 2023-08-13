@@ -13,17 +13,15 @@ use Psr\SimpleCache\CacheInterface;
  * The second is something that require socket connection e.g. redis based cache.
  * Composite cache tries to find data in the light cache and if there is no data
  * in light cache makes a request for heavy cache.
+ *
+ * @psalm-api
  */
 final class CompositeCache implements CacheInterface
 {
-    private readonly CacheInterface $lightCache;
-
-    private readonly CacheInterface $heavyCache;
-
-    public function __construct(CacheInterface $lightCache, CacheInterface $heavyCache)
-    {
-        $this->lightCache = $lightCache;
-        $this->heavyCache = $heavyCache;
+    public function __construct(
+        private readonly CacheInterface $lightCache,
+        private readonly CacheInterface $heavyCache
+    ) {
     }
 
     /**
@@ -44,7 +42,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
+    public function set(string $key, mixed $value, int|\DateInterval $ttl = null): bool
     {
         return $this->heavyCache->set($key, $value, $ttl)
             && $this->lightCache->set($key, $value, $ttl);
@@ -84,7 +82,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
+    public function setMultiple(iterable $values, int|\DateInterval $ttl = null): bool
     {
         return $this->heavyCache->setMultiple($values, $ttl)
             && $this->lightCache->setMultiple($values, $ttl);

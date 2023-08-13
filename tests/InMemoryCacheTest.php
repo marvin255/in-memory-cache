@@ -6,19 +6,20 @@ namespace Marvin255\InMemoryCache\Tests;
 
 use Marvin255\InMemoryCache\InMemoryCache;
 use Marvin255\InMemoryCache\InvalidArgumentException;
+use Marvin255\InMemoryCache\Timer;
 
 /**
  * @internal
  */
 class InMemoryCacheTest extends BaseCase
 {
-    public function testConstructStackSize(): void
+    public function testConstructStackSizeException(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new InMemoryCache(0, 1);
     }
 
-    public function testConstructDefaultTTL(): void
+    public function testConstructDefaultTTLException(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new InMemoryCache(1, 0);
@@ -32,8 +33,9 @@ class InMemoryCacheTest extends BaseCase
 
         $cache = new InMemoryCache(1, 1);
         $cache->set($key, $value, $ttl);
+        $res = $cache->get($key);
 
-        $this->assertSame($value, $cache->get($key));
+        $this->assertSame($value, $res);
     }
 
     public function testGetObject(): void
@@ -45,8 +47,9 @@ class InMemoryCacheTest extends BaseCase
 
         $cache = new InMemoryCache();
         $cache->set($key, $value, $ttl);
+        $res = $cache->get($key);
 
-        $this->assertSame($value, $cache->get($key));
+        $this->assertSame($value, $res);
     }
 
     public function testGetDefault(): void
@@ -55,8 +58,9 @@ class InMemoryCacheTest extends BaseCase
         $default = 'default';
 
         $cache = new InMemoryCache();
+        $res = $cache->get($key, $default);
 
-        $this->assertSame($default, $cache->get($key, $default));
+        $this->assertSame($default, $res);
     }
 
     public function testGetAfterTtl(): void
@@ -64,12 +68,41 @@ class InMemoryCacheTest extends BaseCase
         $key = 'test';
         $value = 'test value';
         $ttl = 1;
+        $timestamp = 123;
 
-        $cache = new InMemoryCache();
+        $timerMock = $this->createTimerMock(
+            [
+                $timestamp,
+                $timestamp + 2,
+            ]
+        );
+
+        $cache = new InMemoryCache(timer: $timerMock);
         $cache->set($key, $value, $ttl);
-        sleep(2);
+        $res = $cache->get($key, null);
 
-        $this->assertNull($cache->get($key, null));
+        $this->assertNull($res);
+    }
+
+    public function testGetRigntInTheEndOfTtl(): void
+    {
+        $key = 'test';
+        $value = 'test value';
+        $ttl = 1;
+        $timestamp = 123;
+
+        $timerMock = $this->createTimerMock(
+            [
+                $timestamp,
+                $timestamp + 1,
+            ]
+        );
+
+        $cache = new InMemoryCache(timer: $timerMock);
+        $cache->set($key, $value, $ttl);
+        $res = $cache->get($key, null);
+
+        $this->assertSame($res, $value);
     }
 
     public function testGetDateInterval(): void
@@ -90,12 +123,20 @@ class InMemoryCacheTest extends BaseCase
         $key = 'test';
         $value = 'test value';
         $ttl = new \DateInterval('PT1S');
+        $timestamp = 123;
 
-        $cache = new InMemoryCache();
+        $timerMock = $this->createTimerMock(
+            [
+                $timestamp,
+                $timestamp + 2,
+            ]
+        );
+
+        $cache = new InMemoryCache(timer: $timerMock);
         $cache->set($key, $value, $ttl);
-        sleep(2);
+        $res = $cache->get($key, null);
 
-        $this->assertNull($cache->get($key, null));
+        $this->assertNull($res);
     }
 
     public function testSetReturnsTrue(): void
@@ -119,11 +160,28 @@ class InMemoryCacheTest extends BaseCase
         $ttl = 60;
 
         $cache = new InMemoryCache();
-        $res = $cache->setMultiple([$key => $value, $key1 => $value1], $ttl);
+        $res = $cache->setMultiple(
+            [
+                $key => $value,
+                $key1 => $value1,
+            ],
+            $ttl
+        );
 
-        $this->assertSame($value, $cache->get($key));
-        $this->assertSame($value1, $cache->get($key1));
-        $this->assertTrue($res);
+        $this->assertTrue(
+            $res,
+            'value returned by method must be true'
+        );
+        $this->assertSame(
+            $value,
+            $cache->get($key),
+            'first cache item must be saved'
+        );
+        $this->assertSame(
+            $value1,
+            $cache->get($key1),
+            'second cache item must be saved'
+        );
     }
 
     public function testSetMultipleIntegerKey(): void
@@ -135,11 +193,28 @@ class InMemoryCacheTest extends BaseCase
         $ttl = 60;
 
         $cache = new InMemoryCache();
-        $res = $cache->setMultiple([$key => $value, $key1 => $value1], $ttl);
+        $res = $cache->setMultiple(
+            [
+                $key => $value,
+                $key1 => $value1,
+            ],
+            $ttl
+        );
 
-        $this->assertSame($value, $cache->get($key));
-        $this->assertSame($value1, $cache->get((string) $key1));
-        $this->assertTrue($res);
+        $this->assertTrue(
+            $res,
+            'value returned by method must be true'
+        );
+        $this->assertSame(
+            $value,
+            $cache->get($key),
+            'first cache item must be saved'
+        );
+        $this->assertSame(
+            $value1,
+            $cache->get((string) $key1),
+            'second cache item must be saved'
+        );
     }
 
     public function testGetMultiple(): void
@@ -155,6 +230,14 @@ class InMemoryCacheTest extends BaseCase
         $cache = new InMemoryCache();
         $cache->set($key, $value, $ttl);
         $cache->set($key1, $value1, $ttl);
+        $res = $cache->getMultiple(
+            [
+                $key2,
+                $key1,
+                $key,
+            ],
+            $default
+        );
 
         $this->assertSame(
             [
@@ -162,7 +245,7 @@ class InMemoryCacheTest extends BaseCase
                 $key1 => $value1,
                 $key => $value,
             ],
-            $cache->getMultiple([$key2, $key1, $key], $default)
+            $res
         );
     }
 
@@ -174,8 +257,9 @@ class InMemoryCacheTest extends BaseCase
 
         $cache = new InMemoryCache();
         $cache->set($key, $value, $ttl);
+        $res = $cache->has($key);
 
-        $this->assertTrue($cache->has($key));
+        $this->assertTrue($res);
     }
 
     public function testDoesNotHave(): void
@@ -186,8 +270,9 @@ class InMemoryCacheTest extends BaseCase
 
         $cache = new InMemoryCache();
         $cache->set($key, $value, $ttl);
+        $res = $cache->has('unexisted');
 
-        $this->assertFalse($cache->has('unexisted'));
+        $this->assertFalse($res);
     }
 
     public function testHasExpired(): void
@@ -195,12 +280,20 @@ class InMemoryCacheTest extends BaseCase
         $key = 'test';
         $value = 'test value';
         $ttl = 1;
+        $timestamp = 123;
 
-        $cache = new InMemoryCache();
+        $timerMock = $this->createTimerMock(
+            [
+                $timestamp,
+                $timestamp + 2,
+            ]
+        );
+
+        $cache = new InMemoryCache(timer: $timerMock);
         $cache->set($key, $value, $ttl);
-        sleep(2);
+        $res = $cache->has($key);
 
-        $this->assertFalse($cache->has($key));
+        $this->assertFalse($res);
     }
 
     public function testDelete(): void
@@ -213,8 +306,14 @@ class InMemoryCacheTest extends BaseCase
         $cache->set($key, $value, $ttl);
         $res = $cache->delete($key);
 
-        $this->assertFalse($cache->has($key));
-        $this->assertTrue($res);
+        $this->assertTrue(
+            $res,
+            'delete method must return true'
+        );
+        $this->assertFalse(
+            $cache->has($key),
+            'has method must return false after deleting'
+        );
     }
 
     public function testDeleteMultiple(): void
@@ -231,12 +330,30 @@ class InMemoryCacheTest extends BaseCase
         $cache->set($key, $value, $ttl);
         $cache->set($key1, $value1, $ttl);
         $cache->set($key2, $value2, $ttl);
-        $res = $cache->deleteMultiple([$key2, $key]);
+        $res = $cache->deleteMultiple(
+            [
+                $key2,
+                $key,
+            ]
+        );
 
-        $this->assertFalse($cache->has($key));
-        $this->assertSame($value1, $cache->get($key1));
-        $this->assertFalse($cache->has($key2));
-        $this->assertTrue($res);
+        $this->assertTrue(
+            $res,
+            'deleteMultiple method must return true'
+        );
+        $this->assertFalse(
+            $cache->has($key),
+            'has method for the firts item must return false after deleting'
+        );
+        $this->assertSame(
+            $value1,
+            $cache->get($key1),
+            'deleteMultiple mustn\'t remove keys thet were not set'
+        );
+        $this->assertFalse(
+            $cache->has($key2),
+            'has method for the second item must return false after deleting'
+        );
     }
 
     public function testClear(): void
@@ -257,7 +374,7 @@ class InMemoryCacheTest extends BaseCase
         $this->assertTrue($res);
     }
 
-    public function testStackSize(): void
+    public function testStackSizeOverflow(): void
     {
         $key = 'test';
         $value = 'test value';
@@ -272,9 +389,18 @@ class InMemoryCacheTest extends BaseCase
         $cache->get($key1);
         $cache->set($key2, $value2);
 
-        $this->assertFalse($cache->has($key), 'Item that cleared from cache');
-        $this->assertTrue($cache->has($key1), 'Item that was selected once');
-        $this->assertTrue($cache->has($key2), 'New item');
+        $this->assertFalse(
+            $cache->has($key),
+            'item that has the smallest counter must be removed'
+        );
+        $this->assertTrue(
+            $cache->has($key1),
+            'item with the bigger counter must be saved'
+        );
+        $this->assertTrue(
+            $cache->has($key2),
+            'new item must be added'
+        );
     }
 
     public function testStackSizeTTL(): void
@@ -285,16 +411,37 @@ class InMemoryCacheTest extends BaseCase
         $value1 = 'test value 1';
         $key2 = 'test_2';
         $value2 = 'test value 2';
+        $timestamp = 123;
+        $nextTimestamp = 125;
 
-        $cache = new InMemoryCache(2, 60);
+        $timerMock = $this->createTimerMock(
+            [
+                $timestamp,
+                $timestamp,
+                $nextTimestamp,
+                $nextTimestamp,
+                $nextTimestamp,
+                $nextTimestamp,
+            ]
+        );
+
+        $cache = new InMemoryCache(2, 60, $timerMock);
         $cache->set($key, $value, 1);
         $cache->set($key1, $value1);
-        sleep(2);
         $cache->set($key2, $value2);
 
-        $this->assertFalse($cache->has($key), 'Item that was expired');
-        $this->assertTrue($cache->has($key1), 'Common item');
-        $this->assertTrue($cache->has($key2), 'New item');
+        $this->assertFalse(
+            $cache->has($key),
+            'expired item must be removed'
+        );
+        $this->assertTrue(
+            $cache->has($key1),
+            'valid item must be saved'
+        );
+        $this->assertTrue(
+            $cache->has($key2),
+            'new item must be added'
+        );
     }
 
     public function testStackSizeUseFirstOneToReplace(): void
@@ -313,8 +460,41 @@ class InMemoryCacheTest extends BaseCase
         $cache->get($key1);
         $cache->set($key2, $value2);
 
-        $this->assertFalse($cache->has($key), 'Item that cleared from cache');
-        $this->assertTrue($cache->has($key1), 'Item that was selected once');
-        $this->assertTrue($cache->has($key2), 'New item');
+        $this->assertFalse(
+            $cache->has($key),
+            'in case of equal counters, first item must be removed'
+        );
+        $this->assertTrue(
+            $cache->has($key1),
+            'in case of equal counters, next items must be saved'
+        );
+        $this->assertTrue(
+            $cache->has($key2),
+            'new item must be added'
+        );
+    }
+
+    /**
+     * @param int[] $freezeAt
+     */
+    private function createTimerMock(array $freezeAt = []): Timer
+    {
+        return new class($freezeAt) implements Timer {
+            private int $counter = 0;
+
+            public function __construct(
+                /** @var int[] */
+                private readonly array $freezeAt
+            ) {
+            }
+
+            public function getCurrentTimestamp(): int
+            {
+                $frozen = $this->freezeAt[$this->counter] ?? null;
+                ++$this->counter;
+
+                return $frozen !== null ? $frozen : time();
+            }
+        };
     }
 }

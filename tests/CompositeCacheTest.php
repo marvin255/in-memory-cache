@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Marvin255\InMemoryCache\Tests;
 
 use Marvin255\InMemoryCache\CompositeCache;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -18,17 +19,18 @@ class CompositeCacheTest extends BaseCase
         $value = 'value';
         $default = 'default';
 
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->method('has')
             ->with($this->equalTo($key))
-            ->willReturn(true)
-        ;
+            ->willReturn(true);
         $light->method('get')
-            ->with($this->equalTo($key), $this->equalTo($default))
-            ->willReturn($value)
-        ;
+            ->with(
+                $this->equalTo($key),
+                $this->equalTo($default)
+            )
+            ->willReturn($value);
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->expects($this->never())->method('get');
 
         $cache = new CompositeCache($light, $heavy);
@@ -43,23 +45,26 @@ class CompositeCacheTest extends BaseCase
         $value = 'value';
         $default = 'default';
 
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->expects($this->once())
             ->method('has')
             ->with($this->equalTo($key))
-            ->willReturn(false)
-        ;
+            ->willReturn(false);
         $light->expects($this->once())
             ->method('set')
-            ->with($this->equalTo($key), $this->equalTo($value))
-        ;
+            ->with(
+                $this->equalTo($key),
+                $this->equalTo($value)
+            );
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->expects($this->once())
             ->method('get')
-            ->with($this->equalTo($key), $this->equalTo($default))
-            ->willReturn($value)
-        ;
+            ->with(
+                $this->equalTo($key),
+                $this->equalTo($default)
+            )
+            ->willReturn($value);
 
         $cache = new CompositeCache($light, $heavy);
         $gotValue = $cache->get($key, $default);
@@ -73,62 +78,79 @@ class CompositeCacheTest extends BaseCase
         $value = 'value';
         $ttl = 60;
 
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->expects($this->once())
             ->method('set')
-            ->with($this->equalTo($key), $this->equalTo($value), $this->equalTo($ttl))
-            ->willReturn(true)
-        ;
+            ->with(
+                $this->equalTo($key),
+                $this->equalTo($value),
+                $this->equalTo($ttl)
+            )
+            ->willReturn(true);
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->expects($this->once())
             ->method('set')
-            ->with($this->equalTo($key), $this->equalTo($value), $this->equalTo($ttl))
-            ->willReturn(true)
-        ;
+            ->with(
+                $this->equalTo($key),
+                $this->equalTo($value),
+                $this->equalTo($ttl)
+            )
+            ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
-        $cache->set($key, $value, $ttl);
+        $res = $cache->set($key, $value, $ttl);
+
+        $this->assertTrue(
+            $res,
+            'set method must return true in case of success'
+        );
     }
 
     public function testDelete(): void
     {
         $key = 'key';
 
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->expects($this->once())
             ->method('delete')
             ->with($this->equalTo($key))
-            ->willReturn(true)
-        ;
+            ->willReturn(true);
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->expects($this->once())
             ->method('delete')
             ->with($this->equalTo($key))
-            ->willReturn(true)
-        ;
+            ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
-        $cache->delete($key);
+        $res = $cache->delete($key);
+
+        $this->assertTrue(
+            $res,
+            'delete method must return true in case of success'
+        );
     }
 
     public function testClear(): void
     {
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->expects($this->once())
             ->method('clear')
-            ->willReturn(true)
-        ;
+            ->willReturn(true);
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->expects($this->once())
             ->method('clear')
-            ->willReturn(true)
-        ;
+            ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
-        $cache->clear();
+        $res = $cache->clear();
+
+        $this->assertTrue(
+            $res,
+            'clear method must return true in case of success'
+        );
     }
 
     public function testGetMultiple(): void
@@ -139,35 +161,40 @@ class CompositeCacheTest extends BaseCase
         $value1 = 'value 1';
         $default = 'default';
 
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->method('has')
             ->willReturnMap(
                 [
                     [$key, false],
                     [$key1, true],
                 ]
-            )
-        ;
+            );
         $light->method('get')
             ->with($this->equalTo($key1), $this->equalTo($default))
-            ->willReturn($value1)
-        ;
+            ->willReturn($value1);
         $light->expects($this->once())
             ->method('set')
-            ->with($this->equalTo($key), $this->equalTo($value))
-        ;
+            ->with(
+                $this->equalTo($key),
+                $this->equalTo($value)
+            );
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->method('get')
-            ->with($this->equalTo($key), $this->equalTo($default))
-            ->willReturn($value)
-        ;
+            ->with(
+                $this->equalTo($key),
+                $this->equalTo($default)
+            )
+            ->willReturn($value);
 
         $cache = new CompositeCache($light, $heavy);
         $multiple = $cache->getMultiple([$key, $key1], $default);
 
         $this->assertSame(
-            [$key => $value, $key1 => $value1],
+            [
+                $key => $value,
+                $key1 => $value1,
+            ],
             $multiple
         );
     }
@@ -177,62 +204,72 @@ class CompositeCacheTest extends BaseCase
         $values = ['key' => 'value'];
         $ttl = 60;
 
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->expects($this->once())
             ->method('setMultiple')
-            ->with($this->equalTo($values), $this->equalTo($ttl))
-            ->willReturn(true)
-        ;
+            ->with(
+                $this->equalTo($values),
+                $this->equalTo($ttl)
+            )
+            ->willReturn(true);
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->expects($this->once())
             ->method('setMultiple')
-            ->with($this->equalTo($values), $this->equalTo($ttl))
-            ->willReturn(true)
-        ;
+            ->with(
+                $this->equalTo($values),
+                $this->equalTo($ttl)
+            )
+            ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
-        $cache->setMultiple($values, $ttl);
+        $res = $cache->setMultiple($values, $ttl);
+
+        $this->assertTrue(
+            $res,
+            'setMultiple method must return true in case of success'
+        );
     }
 
     public function testDeleteMultiple(): void
     {
         $keys = ['key'];
 
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->expects($this->once())
             ->method('deleteMultiple')
             ->with($this->equalTo($keys))
-            ->willReturn(true)
-        ;
+            ->willReturn(true);
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->expects($this->once())
             ->method('deleteMultiple')
             ->with($this->equalTo($keys))
-            ->willReturn(true)
-        ;
+            ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
-        $cache->deleteMultiple($keys);
+        $res = $cache->deleteMultiple($keys);
+
+        $this->assertTrue(
+            $res,
+            'deleteMultiple method must return true in case of success'
+        );
     }
 
     public function testHasLight(): void
     {
         $key = 'key';
 
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->method('has')
             ->with($this->equalTo($key))
-            ->willReturn(true)
-        ;
+            ->willReturn(true);
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->expects($this->never())
             ->method('has')
             ->with($this->equalTo($key))
-            ->willReturn(false)
-        ;
+            ->willReturn(false);
 
         $cache = new CompositeCache($light, $heavy);
         $has = $cache->has($key);
@@ -244,17 +281,15 @@ class CompositeCacheTest extends BaseCase
     {
         $key = 'key';
 
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->method('has')
             ->with($this->equalTo($key))
-            ->willReturn(false)
-        ;
+            ->willReturn(false);
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->method('has')
             ->with($this->equalTo($key))
-            ->willReturn(true)
-        ;
+            ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
         $has = $cache->has($key);
@@ -266,21 +301,30 @@ class CompositeCacheTest extends BaseCase
     {
         $key = 'key';
 
-        $light = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $light = $this->createCacheInterfaceMock();
         $light->method('has')
             ->with($this->equalTo($key))
-            ->willReturn(false)
-        ;
+            ->willReturn(false);
 
-        $heavy = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $heavy = $this->createCacheInterfaceMock();
         $heavy->method('has')
             ->with($this->equalTo($key))
-            ->willReturn(false)
-        ;
+            ->willReturn(false);
 
         $cache = new CompositeCache($light, $heavy);
         $has = $cache->has($key);
 
         $this->assertFalse($has);
+    }
+
+    /**
+     * @return MockObject&CacheInterface
+     */
+    private function createCacheInterfaceMock(): CacheInterface
+    {
+        /** @var MockObject&CacheInterface */
+        $mock = $this->getMockBuilder(CacheInterface::class)->getMock();
+
+        return $mock;
     }
 }
