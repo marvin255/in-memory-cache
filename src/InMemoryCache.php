@@ -13,6 +13,9 @@ use Psr\SimpleCache\CacheInterface;
  */
 final class InMemoryCache implements CacheInterface
 {
+    public const DEFAULT_STACK_SIZE = 1000;
+    public const DEFAULT_TTL = 60;
+
     private Timer $timer;
 
     /**
@@ -21,8 +24,8 @@ final class InMemoryCache implements CacheInterface
     private array $stack = [];
 
     public function __construct(
-        private readonly int $stackSize = 1000,
-        private readonly int $defaultTTL = 60,
+        private readonly int $stackSize = self::DEFAULT_STACK_SIZE,
+        private readonly int $defaultTTL = self::DEFAULT_TTL,
         Timer $timer = null
     ) {
         if ($this->stackSize < 1) {
