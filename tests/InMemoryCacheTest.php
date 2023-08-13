@@ -12,13 +12,13 @@ use Marvin255\InMemoryCache\InvalidArgumentException;
  */
 class InMemoryCacheTest extends BaseCase
 {
-    public function testConstructStackSize(): void
+    public function testConstructStackSizeException(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new InMemoryCache(0, 1);
     }
 
-    public function testConstructDefaultTTL(): void
+    public function testConstructDefaultTTLException(): void
     {
         $this->expectException(InvalidArgumentException::class);
         new InMemoryCache(1, 0);
