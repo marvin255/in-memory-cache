@@ -44,7 +44,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
+    public function set(string $key, mixed $value, int|\DateInterval $ttl = null): bool
     {
         return $this->heavyCache->set($key, $value, $ttl)
             && $this->lightCache->set($key, $value, $ttl);
@@ -84,7 +84,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
+    public function setMultiple(iterable $values, int|\DateInterval $ttl = null): bool
     {
         return $this->heavyCache->setMultiple($values, $ttl)
             && $this->lightCache->setMultiple($values, $ttl);
