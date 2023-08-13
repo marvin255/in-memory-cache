@@ -7,7 +7,6 @@ namespace Marvin255\InMemoryCache\Tests;
 use Marvin255\InMemoryCache\InMemoryCache;
 use Marvin255\InMemoryCache\InvalidArgumentException;
 use Marvin255\InMemoryCache\Timer;
-use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @internal
@@ -69,12 +68,20 @@ class InMemoryCacheTest extends BaseCase
         $key = 'test';
         $value = 'test value';
         $ttl = 1;
+        $timestamp = 123;
 
-        $cache = new InMemoryCache();
+        $timerMock = $this->createTimerMock(
+            [
+                $timestamp,
+                $timestamp + 2,
+            ]
+        );
+
+        $cache = new InMemoryCache(timer: $timerMock);
         $cache->set($key, $value, $ttl);
-        sleep(2);
+        $res = $cache->get($key, null);
 
-        $this->assertNull($cache->get($key, null));
+        $this->assertNull($res);
     }
 
     public function testGetDateInterval(): void
@@ -95,12 +102,20 @@ class InMemoryCacheTest extends BaseCase
         $key = 'test';
         $value = 'test value';
         $ttl = new \DateInterval('PT1S');
+        $timestamp = 123;
 
-        $cache = new InMemoryCache();
+        $timerMock = $this->createTimerMock(
+            [
+                $timestamp,
+                $timestamp + 2,
+            ]
+        );
+
+        $cache = new InMemoryCache(timer: $timerMock);
         $cache->set($key, $value, $ttl);
-        sleep(2);
+        $res = $cache->get($key, null);
 
-        $this->assertNull($cache->get($key, null));
+        $this->assertNull($res);
     }
 
     public function testSetReturnsTrue(): void
@@ -244,10 +259,17 @@ class InMemoryCacheTest extends BaseCase
         $key = 'test';
         $value = 'test value';
         $ttl = 1;
+        $timestamp = 123;
 
-        $cache = new InMemoryCache();
+        $timerMock = $this->createTimerMock(
+            [
+                $timestamp,
+                $timestamp + 2,
+            ]
+        );
+
+        $cache = new InMemoryCache(timer: $timerMock);
         $cache->set($key, $value, $ttl);
-        sleep(2);
         $res = $cache->has($key);
 
         $this->assertFalse($res);
@@ -368,11 +390,23 @@ class InMemoryCacheTest extends BaseCase
         $value1 = 'test value 1';
         $key2 = 'test_2';
         $value2 = 'test value 2';
+        $timestamp = 123;
+        $nextTimestamp = 125;
 
-        $cache = new InMemoryCache(2, 60);
+        $timerMock = $this->createTimerMock(
+            [
+                $timestamp,
+                $timestamp,
+                $nextTimestamp,
+                $nextTimestamp,
+                $nextTimestamp,
+                $nextTimestamp,
+            ]
+        );
+
+        $cache = new InMemoryCache(2, 60, $timerMock);
         $cache->set($key, $value, 1);
         $cache->set($key1, $value1);
-        sleep(2);
         $cache->set($key2, $value2);
 
         $this->assertFalse(
@@ -420,17 +454,26 @@ class InMemoryCacheTest extends BaseCase
     }
 
     /**
-     * @return MockObject&Timer
+     * @param int[] $freezeAt
      */
-    private function createTimerMock(int $freezeAt = null): Timer
+    private function createTimerMock(array $freezeAt = []): Timer
     {
-        /** @var MockObject&Timer */
-        $mock = $this->getMockBuilder(Timer::class)->getMock();
+        return new class($freezeAt) implements Timer {
+            private int $counter = 0;
 
-        if ($freezeAt !== null) {
-            $mock->method('getCurrentTimestamp')->willReturn($freezeAt);
-        }
+            public function __construct(
+                /** @var int[] */
+                private readonly array $freezeAt
+            ) {
+            }
 
-        return $mock;
+            public function getCurrentTimestamp(): int
+            {
+                $frozen = $this->freezeAt[$this->counter] ?? null;
+                ++$this->counter;
+
+                return $frozen !== null ? $frozen : time();
+            }
+        };
     }
 }

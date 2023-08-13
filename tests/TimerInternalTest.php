@@ -20,14 +20,4 @@ class TimerInternalTest extends BaseCase
 
         $this->assertSame($time, $res);
     }
-
-    public function testGetCurrentTimestampWithFrozenTime(): void
-    {
-        $time = 123;
-
-        $timer = new TimerInternal($time);
-        $res = $timer->getCurrentTimestamp();
-
-        $this->assertSame($time, $res);
-    }
 }
