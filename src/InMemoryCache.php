@@ -11,6 +11,8 @@ use Psr\SimpleCache\CacheInterface;
  */
 final class InMemoryCache implements CacheInterface
 {
+    private Timer $timer;
+
     /**
      * @var array<string, CachedItem>
      */
@@ -18,7 +20,8 @@ final class InMemoryCache implements CacheInterface
 
     public function __construct(
         private readonly int $stackSize = 1000,
-        private readonly int $defaultTTL = 60
+        private readonly int $defaultTTL = 60,
+        Timer $timer = null
     ) {
         if ($this->stackSize < 1) {
             throw new InvalidArgumentException('Stack size must be greater than 0');
@@ -26,6 +29,7 @@ final class InMemoryCache implements CacheInterface
         if ($this->defaultTTL < 1) {
             throw new InvalidArgumentException('Default TTL must be greater than 0');
         }
+        $this->timer = $timer ?: TimerFactory::create();
     }
 
     /**
@@ -125,7 +129,7 @@ final class InMemoryCache implements CacheInterface
      */
     private function createValidTill(null|int|\DateInterval $ttl): int
     {
-        $validTill = $this->getCurrentTimestamp();
+        $validTill = $this->timer->getCurrentTimestamp();
 
         if ($ttl === null) {
             $validTill += $this->defaultTTL;
@@ -171,7 +175,7 @@ final class InMemoryCache implements CacheInterface
      */
     private function isItemValid(CachedItem $item): bool
     {
-        return $item->getValidTill() >= $this->getCurrentTimestamp();
+        return $item->getValidTill() >= $this->timer->getCurrentTimestamp();
     }
 
     /**
@@ -180,13 +184,5 @@ final class InMemoryCache implements CacheInterface
     private function calculateItemSortScore(CachedItem $item): int
     {
         return $item->getSelectCount();
-    }
-
-    /**
-     * Returns current timestamp.
-     */
-    private function getCurrentTimestamp(): int
-    {
-        return time();
     }
 }
