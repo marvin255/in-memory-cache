@@ -9,11 +9,6 @@
         "text": "infection.log"
     },
     "mutators": {
-        "@default": true,
-        "GreaterThanOrEqualTo": {
-            "ignore": [
-                "Marvin255\\InMemoryCache\\InMemoryCache::isItemValid"
-            ]
-        }
+        "@default": true
     }
 }

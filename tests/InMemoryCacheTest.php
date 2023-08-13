@@ -84,6 +84,27 @@ class InMemoryCacheTest extends BaseCase
         $this->assertNull($res);
     }
 
+    public function testGetRigntInTheEndOfTtl(): void
+    {
+        $key = 'test';
+        $value = 'test value';
+        $ttl = 1;
+        $timestamp = 123;
+
+        $timerMock = $this->createTimerMock(
+            [
+                $timestamp,
+                $timestamp + 1,
+            ]
+        );
+
+        $cache = new InMemoryCache(timer: $timerMock);
+        $cache->set($key, $value, $ttl);
+        $res = $cache->get($key, null);
+
+        $this->assertSame($res, $value);
+    }
+
     public function testGetDateInterval(): void
     {
         $key = 'test';
