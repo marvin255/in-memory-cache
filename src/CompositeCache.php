@@ -13,6 +13,8 @@ use Psr\SimpleCache\CacheInterface;
  * The second is something that require socket connection e.g. redis based cache.
  * Composite cache tries to find data in the light cache and if there is no data
  * in light cache makes a request for heavy cache.
+ *
+ * @psalm-api
  */
 final class CompositeCache implements CacheInterface
 {

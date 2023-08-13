@@ -8,6 +8,8 @@ use Psr\SimpleCache\CacheInterface;
 
 /**
  * Simple PSR-16 implementation that uses internal array.
+ *
+ * @psalm-api
  */
 final class InMemoryCache implements CacheInterface
 {

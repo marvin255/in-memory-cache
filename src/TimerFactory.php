@@ -6,6 +6,8 @@ namespace Marvin255\InMemoryCache;
 
 /**
  * Factory that provides timer object.
+ *
+ * @psalm-api
  */
 final class TimerFactory
 {
