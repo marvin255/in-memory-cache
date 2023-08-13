@@ -16,7 +16,7 @@ RUN set -xe && apk update && apk add --no-cache \
     linux-headers
 
 
-RUN docker-php-ext-install zip soap \
+RUN docker-php-ext-install zip opcache \
     && docker-php-source extract \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
