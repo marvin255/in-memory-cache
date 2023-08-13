@@ -11,26 +11,21 @@ use Psr\SimpleCache\CacheInterface;
  */
 final class InMemoryCache implements CacheInterface
 {
-    private readonly int $stackSize;
-
-    private readonly int $defaultTTL;
-
     /**
      * @var array<string, CachedItem>
      */
     private array $stack = [];
 
-    public function __construct(int $stackSize = 1000, int $defaultTTL = 60)
-    {
-        if ($stackSize < 1) {
+    public function __construct(
+        private readonly int $stackSize = 1000,
+        private readonly int $defaultTTL = 60
+    ) {
+        if ($this->stackSize < 1) {
             throw new InvalidArgumentException('Stack size must be greater than 0');
         }
-        if ($defaultTTL < 1) {
+        if ($this->defaultTTL < 1) {
             throw new InvalidArgumentException('Default TTL must be greater than 0');
         }
-
-        $this->stackSize = $stackSize;
-        $this->defaultTTL = $defaultTTL;
     }
 
     /**
