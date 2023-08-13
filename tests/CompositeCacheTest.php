@@ -99,7 +99,12 @@ class CompositeCacheTest extends BaseCase
             ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
-        $cache->set($key, $value, $ttl);
+        $res = $cache->set($key, $value, $ttl);
+
+        $this->assertTrue(
+            $res,
+            'set method must return true in case of success'
+        );
     }
 
     public function testDelete(): void
@@ -119,7 +124,12 @@ class CompositeCacheTest extends BaseCase
             ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
-        $cache->delete($key);
+        $res = $cache->delete($key);
+
+        $this->assertTrue(
+            $res,
+            'delete method must return true in case of success'
+        );
     }
 
     public function testClear(): void
@@ -135,7 +145,12 @@ class CompositeCacheTest extends BaseCase
             ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
-        $cache->clear();
+        $res = $cache->clear();
+
+        $this->assertTrue(
+            $res,
+            'clear method must return true in case of success'
+        );
     }
 
     public function testGetMultiple(): void
@@ -176,7 +191,10 @@ class CompositeCacheTest extends BaseCase
         $multiple = $cache->getMultiple([$key, $key1], $default);
 
         $this->assertSame(
-            [$key => $value, $key1 => $value1],
+            [
+                $key => $value,
+                $key1 => $value1,
+            ],
             $multiple
         );
     }
@@ -205,7 +223,12 @@ class CompositeCacheTest extends BaseCase
             ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
-        $cache->setMultiple($values, $ttl);
+        $res = $cache->setMultiple($values, $ttl);
+
+        $this->assertTrue(
+            $res,
+            'setMultiple method must return true in case of success'
+        );
     }
 
     public function testDeleteMultiple(): void
@@ -225,7 +248,12 @@ class CompositeCacheTest extends BaseCase
             ->willReturn(true);
 
         $cache = new CompositeCache($light, $heavy);
-        $cache->deleteMultiple($keys);
+        $res = $cache->deleteMultiple($keys);
+
+        $this->assertTrue(
+            $res,
+            'deleteMultiple method must return true in case of success'
+        );
     }
 
     public function testHasLight(): void
