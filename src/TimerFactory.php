@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Marvin255\InMemoryCache;
 
 /**
- * Factory that provides timer object.
+ * Factory that provides timer objects.
  *
  * @psalm-api
  */
@@ -18,7 +18,7 @@ final class TimerFactory
     }
 
     /**
-     * Return timer object.
+     * Create and return a timer object.
      */
     public static function create(): Timer
     {

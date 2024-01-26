@@ -130,7 +130,7 @@ final class InMemoryCache implements CacheInterface
     }
 
     /**
-     * Counts time before which cached item is valid.
+     * Counts time till cached item is valid.
      */
     private function createValidTill(null|int|\DateInterval $ttl): int
     {
@@ -148,10 +148,10 @@ final class InMemoryCache implements CacheInterface
     }
 
     /**
-     * Removes one item from stack to insert new one.
+     * Removes one item from the stack to insert a new one.
      *
-     * Tries to remove expired item if there is some.
-     * In other case removes item with the least select count.
+     * It tries to remove an expired item if there is any.
+     * In other case it removes an item with the lowest select count value.
      */
     private function clearStack(): void
     {
@@ -170,13 +170,13 @@ final class InMemoryCache implements CacheInterface
             }
         }
 
-        if ($keyToRemove) {
+        if ($keyToRemove !== null) {
             unset($this->stack[$keyToRemove]);
         }
     }
 
     /**
-     * Checks that item valid and can be returned.
+     * Checks that item is valid and can be returned.
      */
     private function isItemValid(CachedItem $item): bool
     {
