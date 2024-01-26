@@ -9,10 +9,10 @@ use Psr\SimpleCache\CacheInterface;
 /**
  * PSR-16 cache that uses two diffrent caches to store data.
  *
- * The first is a light and fast cache e.g. InMemoryCache.
- * The second is something that require socket connection e.g. redis based cache.
- * Composite cache tries to find data in the light cache and if there is no data
- * in light cache makes a request for heavy cache.
+ * The first cache object is a light and fast cache e.g. InMemoryCache.
+ * The second cache object is something that requires socket connection e.g. redis based cache.
+ * Composite cache tries to find data in the light cache, and only if there is no data,
+ * queries the heavy cache.
  *
  * @psalm-api
  */
