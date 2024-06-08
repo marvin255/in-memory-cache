@@ -32,7 +32,7 @@ $defaultTTL = 60;       // 60 seconds as default TTL
 
 $inMemoryCache = new InMemoryCache($maxCacheSize, $defaultTTL);
 $redisCache = new MyAwesomeRedisCache();
-$decorator = CompositeCache($inMemoryCache, $redisCache);
+$decorator = new CompositeCache($inMemoryCache, $redisCache);
 
 $decorator->get('test'); // this get will trigger a request to redis and save data to memory
 $decorator->get('test'); // this get won't trigger any requests and just return data from memory
