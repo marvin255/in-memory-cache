@@ -26,7 +26,7 @@ final class InMemoryCache implements CacheInterface
     public function __construct(
         private readonly int $stackSize = self::DEFAULT_STACK_SIZE,
         private readonly int $defaultTTL = self::DEFAULT_TTL,
-        Timer $timer = null
+        ?Timer $timer = null
     ) {
         if ($this->stackSize < 1) {
             throw new InvalidArgumentException('Stack size must be greater than 0');
@@ -52,7 +52,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function set(string $key, mixed $value, int|\DateInterval $ttl = null): bool
+    public function set(string $key, mixed $value, int|\DateInterval|null $ttl = null): bool
     {
         if (\count($this->stack) >= $this->stackSize) {
             $this->clearStack();
@@ -100,7 +100,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function setMultiple(iterable $values, int|\DateInterval $ttl = null): bool
+    public function setMultiple(iterable $values, int|\DateInterval|null $ttl = null): bool
     {
         foreach ($values as $key => $value) {
             $this->set((string) $key, $value, $ttl);
@@ -132,7 +132,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * Counts time till cached item is valid.
      */
-    private function createValidTill(null|int|\DateInterval $ttl): int
+    private function createValidTill(int|\DateInterval|null $ttl): int
     {
         $validTill = $this->timer->getCurrentTimestamp();
 
