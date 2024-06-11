@@ -16,7 +16,7 @@ final class InMemoryCache implements CacheInterface
     public const DEFAULT_STACK_SIZE = 1000;
     public const DEFAULT_TTL = 60;
 
-    private Timer $timer;
+    private readonly Timer $timer;
 
     /**
      * @var array<string, CachedItem>
