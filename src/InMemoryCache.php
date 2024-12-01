@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Marvin255\InMemoryCache;
 
+use Psr\Clock\ClockInterface;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -16,7 +17,7 @@ final class InMemoryCache implements CacheInterface
     public const DEFAULT_STACK_SIZE = 1000;
     public const DEFAULT_TTL = 60;
 
-    private readonly Timer $timer;
+    private readonly ClockInterface $clock;
 
     /**
      * @var array<string, CachedItem>
@@ -26,7 +27,7 @@ final class InMemoryCache implements CacheInterface
     public function __construct(
         private readonly int $stackSize = self::DEFAULT_STACK_SIZE,
         private readonly int $defaultTTL = self::DEFAULT_TTL,
-        ?Timer $timer = null
+        ?ClockInterface $clock = null,
     ) {
         if ($this->stackSize < 1) {
             throw new InvalidArgumentException('Stack size must be greater than 0');
@@ -34,7 +35,7 @@ final class InMemoryCache implements CacheInterface
         if ($this->defaultTTL < 1) {
             throw new InvalidArgumentException('Default TTL must be greater than 0');
         }
-        $this->timer = $timer ?: TimerFactory::create();
+        $this->clock = $clock ?: new Clock();
     }
 
     /**
@@ -134,7 +135,7 @@ final class InMemoryCache implements CacheInterface
      */
     private function createValidTill(int|\DateInterval|null $ttl): int
     {
-        $validTill = $this->timer->getCurrentTimestamp();
+        $validTill = $this->clock->now()->getTimestamp();
 
         if ($ttl === null) {
             $validTill += $this->defaultTTL;
@@ -180,7 +181,7 @@ final class InMemoryCache implements CacheInterface
      */
     private function isItemValid(CachedItem $item): bool
     {
-        return $item->getValidTill() >= $this->timer->getCurrentTimestamp();
+        return $item->getValidTill() >= $this->clock->now()->getTimestamp();
     }
 
     /**

@@ -6,7 +6,7 @@ namespace Marvin255\InMemoryCache\Tests;
 
 use Marvin255\InMemoryCache\InMemoryCache;
 use Marvin255\InMemoryCache\InvalidArgumentException;
-use Marvin255\InMemoryCache\Timer;
+use Psr\Clock\ClockInterface;
 
 /**
  * @internal
@@ -70,14 +70,14 @@ class InMemoryCacheTest extends BaseCase
         $ttl = 1;
         $timestamp = 123;
 
-        $timerMock = $this->createTimerMock(
+        $clockMock = $this->createClockMock(
             [
                 $timestamp,
                 $timestamp + 2,
             ]
         );
 
-        $cache = new InMemoryCache(timer: $timerMock);
+        $cache = new InMemoryCache(clock: $clockMock);
         $cache->set($key, $value, $ttl);
         $res = $cache->get($key, null);
 
@@ -91,14 +91,14 @@ class InMemoryCacheTest extends BaseCase
         $ttl = 1;
         $timestamp = 123;
 
-        $timerMock = $this->createTimerMock(
+        $clockMock = $this->createClockMock(
             [
                 $timestamp,
                 $timestamp + 1,
             ]
         );
 
-        $cache = new InMemoryCache(timer: $timerMock);
+        $cache = new InMemoryCache(clock: $clockMock);
         $cache->set($key, $value, $ttl);
         $res = $cache->get($key, null);
 
@@ -125,14 +125,14 @@ class InMemoryCacheTest extends BaseCase
         $ttl = new \DateInterval('PT1S');
         $timestamp = 123;
 
-        $timerMock = $this->createTimerMock(
+        $clockMock = $this->createClockMock(
             [
                 $timestamp,
                 $timestamp + 2,
             ]
         );
 
-        $cache = new InMemoryCache(timer: $timerMock);
+        $cache = new InMemoryCache(clock: $clockMock);
         $cache->set($key, $value, $ttl);
         $res = $cache->get($key, null);
 
@@ -282,14 +282,14 @@ class InMemoryCacheTest extends BaseCase
         $ttl = 1;
         $timestamp = 123;
 
-        $timerMock = $this->createTimerMock(
+        $clockMock = $this->createClockMock(
             [
                 $timestamp,
                 $timestamp + 2,
             ]
         );
 
-        $cache = new InMemoryCache(timer: $timerMock);
+        $cache = new InMemoryCache(clock: $clockMock);
         $cache->set($key, $value, $ttl);
         $res = $cache->has($key);
 
@@ -414,7 +414,7 @@ class InMemoryCacheTest extends BaseCase
         $timestamp = 123;
         $nextTimestamp = 125;
 
-        $timerMock = $this->createTimerMock(
+        $clockMock = $this->createClockMock(
             [
                 $timestamp,
                 $timestamp,
@@ -425,7 +425,7 @@ class InMemoryCacheTest extends BaseCase
             ]
         );
 
-        $cache = new InMemoryCache(2, 60, $timerMock);
+        $cache = new InMemoryCache(2, 60, $clockMock);
         $cache->set($key, $value, 1);
         $cache->set($key1, $value1);
         $cache->set($key2, $value2);
@@ -477,23 +477,23 @@ class InMemoryCacheTest extends BaseCase
     /**
      * @param int[] $freezeAt
      */
-    private function createTimerMock(array $freezeAt = []): Timer
+    private function createClockMock(array $freezeAt = []): ClockInterface
     {
-        return new class($freezeAt) implements Timer {
+        return new class($freezeAt) implements ClockInterface {
             private int $counter = 0;
 
             public function __construct(
                 /** @var int[] */
-                private readonly array $freezeAt
+                private readonly array $freezeAt,
             ) {
             }
 
-            public function getCurrentTimestamp(): int
+            public function now(): \DateTimeImmutable
             {
                 $frozen = $this->freezeAt[$this->counter] ?? null;
                 ++$this->counter;
 
-                return $frozen !== null ? $frozen : time();
+                return (new \DateTimeImmutable())->setTimestamp($frozen ?? time());
             }
         };
     }

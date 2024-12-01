@@ -12,6 +12,8 @@ updates:
       interval: "weekly"
     allow:
       - dependency-name: "psr/simple-cache"
+      - dependency-name: "psr/clock"
+      - dependency-name: "symfony/clock"
       - dependency-name: "phpunit/phpunit"
       - dependency-name: "friendsofphp/php-cs-fixer"
       - dependency-name: "vimeo/psalm"

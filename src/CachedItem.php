@@ -15,7 +15,7 @@ final class CachedItem
 
     public function __construct(
         private readonly mixed $payload,
-        private readonly int $validTill
+        private readonly int $validTill,
     ) {
     }
 

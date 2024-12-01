@@ -20,7 +20,7 @@ final class CompositeCache implements CacheInterface
 {
     public function __construct(
         private readonly CacheInterface $lightCache,
-        private readonly CacheInterface $heavyCache
+        private readonly CacheInterface $heavyCache,
     ) {
     }
 
