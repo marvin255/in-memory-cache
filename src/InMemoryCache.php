@@ -17,12 +17,9 @@ final class InMemoryCache implements CacheInterface
     public const DEFAULT_STACK_SIZE = 1000;
     public const DEFAULT_TTL = 60;
 
-    private readonly ClockInterface $clock;
+    private readonly CachedMap $cachedMap;
 
-    /**
-     * @var array<string, CachedItem>
-     */
-    private array $stack = [];
+    private readonly ClockInterface $clock;
 
     public function __construct(
         private readonly int $stackSize = self::DEFAULT_STACK_SIZE,
@@ -35,6 +32,7 @@ final class InMemoryCache implements CacheInterface
         if ($this->defaultTTL < 1) {
             throw new InvalidArgumentException('Default TTL must be greater than 0');
         }
+        $this->cachedMap = new CachedMap();
         $this->clock = $clock ?: new Clock();
     }
 
@@ -43,11 +41,9 @@ final class InMemoryCache implements CacheInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        $item = $this->stack[$key] ?? null;
+        $item = $this->cachedMap->get($key);
 
-        return $item !== null && $this->isItemValid($item)
-            ? $item->getPayload()
-            : $default;
+        return $this->isItemValid($item) ? $item->getPayload() : $default;
     }
 
     /**
@@ -55,12 +51,12 @@ final class InMemoryCache implements CacheInterface
      */
     public function set(string $key, mixed $value, int|\DateInterval|null $ttl = null): bool
     {
-        if (\count($this->stack) >= $this->stackSize) {
-            $this->clearStack();
+        if (\count($this->cachedMap) >= $this->stackSize) {
+            $this->clearMap();
         }
 
         $validTill = $this->createValidTill($ttl);
-        $this->stack[$key] = new CachedItem($value, $validTill);
+        $this->cachedMap->set($key, new CachedItem($value, $validTill));
 
         return true;
     }
@@ -70,7 +66,7 @@ final class InMemoryCache implements CacheInterface
      */
     public function delete(string $key): bool
     {
-        unset($this->stack[$key]);
+        $this->cachedMap->delete($key);
 
         return true;
     }
@@ -80,7 +76,7 @@ final class InMemoryCache implements CacheInterface
      */
     public function clear(): bool
     {
-        $this->stack = [];
+        $this->cachedMap->clear();
 
         return true;
     }
@@ -127,7 +123,9 @@ final class InMemoryCache implements CacheInterface
      */
     public function has(string $key): bool
     {
-        return isset($this->stack[$key]) && $this->isItemValid($this->stack[$key]);
+        return $this->isItemValid(
+            $this->cachedMap->get($key)
+        );
     }
 
     /**
@@ -149,22 +147,22 @@ final class InMemoryCache implements CacheInterface
     }
 
     /**
-     * Removes one item from the stack to insert a new one.
+     * Removes one item from the map to insert a new one.
      *
      * It tries to remove an expired item if there is any.
      * In other case it removes an item with the lowest select count value.
      */
-    private function clearStack(): void
+    private function clearMap(): void
     {
         $leastScore = null;
         $keyToRemove = null;
 
-        foreach ($this->stack as $key => $item) {
+        foreach ($this->cachedMap as $key => $item) {
             if (!$this->isItemValid($item)) {
                 $keyToRemove = $key;
                 break;
             }
-            $score = $this->calculateItemSortScore($item);
+            $score = $item->getSelectCount();
             if ($leastScore === null || $leastScore > $score) {
                 $keyToRemove = $key;
                 $leastScore = $score;
@@ -172,23 +170,18 @@ final class InMemoryCache implements CacheInterface
         }
 
         if ($keyToRemove !== null) {
-            unset($this->stack[$keyToRemove]);
+            $this->cachedMap->delete($keyToRemove);
         }
     }
 
     /**
      * Checks that item is valid and can be returned.
+     *
+     * @psalm-assert-if-true CachedItem $item
      */
-    private function isItemValid(CachedItem $item): bool
+    private function isItemValid(?CachedItem $item): bool
     {
-        return $item->getValidTill() >= $this->clock->now()->getTimestamp();
-    }
-
-    /**
-     * Calculates score for item. Item with the least score will be removed in a case when stack is full.
-     */
-    private function calculateItemSortScore(CachedItem $item): int
-    {
-        return $item->getSelectCount();
+        return $item !== null
+            && $item->getValidTill() >= $this->clock->now()->getTimestamp();
     }
 }

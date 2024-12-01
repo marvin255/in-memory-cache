@@ -1,7 +1,7 @@
 {
   "name": "marvin255/in-memory-cache",
   "type": "library",
-  "description": "Array based cache for PHP.",
+  "description": "Array based cache for PHP",
   "keywords": ["php", "cache"],
   "license": "MIT",
   "require": {
