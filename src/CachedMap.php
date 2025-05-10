@@ -53,6 +53,7 @@ final class CachedMap implements \Countable, \Iterator
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function current(): CachedItem
     {
         return current($this->map);
@@ -61,6 +62,7 @@ final class CachedMap implements \Countable, \Iterator
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function key(): string
     {
         return key($this->map);
@@ -69,6 +71,7 @@ final class CachedMap implements \Countable, \Iterator
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function next(): void
     {
         next($this->map);
@@ -77,6 +80,7 @@ final class CachedMap implements \Countable, \Iterator
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function rewind(): void
     {
         reset($this->map);
@@ -85,6 +89,7 @@ final class CachedMap implements \Countable, \Iterator
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function valid(): bool
     {
         return current($this->map) !== false;
@@ -93,6 +98,7 @@ final class CachedMap implements \Countable, \Iterator
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function count(): int
     {
         return \count($this->map);

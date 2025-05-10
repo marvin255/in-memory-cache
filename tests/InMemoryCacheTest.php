@@ -488,6 +488,7 @@ class InMemoryCacheTest extends BaseCase
             ) {
             }
 
+            #[\Override]
             public function now(): \DateTimeImmutable
             {
                 $frozen = $this->freezeAt[$this->counter] ?? null;

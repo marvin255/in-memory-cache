@@ -39,6 +39,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function get(string $key, mixed $default = null): mixed
     {
         $item = $this->cachedMap->get($key);
@@ -49,6 +50,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function set(string $key, mixed $value, int|\DateInterval|null $ttl = null): bool
     {
         if (\count($this->cachedMap) >= $this->stackSize) {
@@ -64,6 +66,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function delete(string $key): bool
     {
         $this->cachedMap->delete($key);
@@ -74,6 +77,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function clear(): bool
     {
         $this->cachedMap->clear();
@@ -84,6 +88,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
         $result = [];
@@ -97,6 +102,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function setMultiple(iterable $values, int|\DateInterval|null $ttl = null): bool
     {
         foreach ($values as $key => $value) {
@@ -109,6 +115,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function deleteMultiple(iterable $keys): bool
     {
         foreach ($keys as $key) {
@@ -121,6 +128,7 @@ final class InMemoryCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function has(string $key): bool
     {
         return $this->isItemValid(
