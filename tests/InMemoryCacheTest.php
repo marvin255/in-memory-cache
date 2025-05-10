@@ -11,7 +11,7 @@ use Psr\Clock\ClockInterface;
 /**
  * @internal
  */
-class InMemoryCacheTest extends BaseCase
+final class InMemoryCacheTest extends BaseCase
 {
     public function testConstructStackSizeException(): void
     {
@@ -488,6 +488,7 @@ class InMemoryCacheTest extends BaseCase
             ) {
             }
 
+            #[\Override]
             public function now(): \DateTimeImmutable
             {
                 $frozen = $this->freezeAt[$this->counter] ?? null;

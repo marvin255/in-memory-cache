@@ -11,7 +11,7 @@ use Psr\SimpleCache\CacheInterface;
 /**
  * @internal
  */
-class CompositeCacheTest extends BaseCase
+final class CompositeCacheTest extends BaseCase
 {
     public function testGetLight(): void
     {

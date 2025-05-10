@@ -27,6 +27,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function get(string $key, mixed $default = null): mixed
     {
         if ($this->lightCache->has($key)) {
@@ -42,6 +43,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function set(string $key, mixed $value, int|\DateInterval|null $ttl = null): bool
     {
         return $this->heavyCache->set($key, $value, $ttl)
@@ -51,6 +53,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function delete(string $key): bool
     {
         return $this->heavyCache->delete($key)
@@ -60,6 +63,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function clear(): bool
     {
         return $this->heavyCache->clear()
@@ -69,6 +73,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
         $return = [];
@@ -82,6 +87,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function setMultiple(iterable $values, int|\DateInterval|null $ttl = null): bool
     {
         return $this->heavyCache->setMultiple($values, $ttl)
@@ -91,6 +97,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function deleteMultiple(iterable $keys): bool
     {
         return $this->heavyCache->deleteMultiple($keys)
@@ -100,6 +107,7 @@ final class CompositeCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function has(string $key): bool
     {
         return $this->lightCache->has($key)

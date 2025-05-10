@@ -16,6 +16,7 @@ final class Clock implements ClockInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function now(): \DateTimeImmutable
     {
         return new \DateTimeImmutable();
