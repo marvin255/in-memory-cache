@@ -64,9 +64,12 @@ final class CachedMap implements \Countable, \Iterator
 
     /**
      * {@inheritdoc}
+     *
+     * @psalm-suppress InvalidNullableReturnType
+     * @psalm-suppress NullableReturnStatement
      */
     #[\Override]
-    public function key(): ?string
+    public function key(): string
     {
         return key($this->map);
     }
