@@ -11,7 +11,7 @@ use Psr\Clock\ClockInterface;
 /**
  * @internal
  */
-class InMemoryCacheTest extends BaseCase
+final class InMemoryCacheTest extends BaseCase
 {
     public function testConstructStackSizeException(): void
     {

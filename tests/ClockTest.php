@@ -9,7 +9,7 @@ use Marvin255\InMemoryCache\Clock;
 /**
  * @internal
  */
-class ClockTest extends BaseCase
+final class ClockTest extends BaseCase
 {
     public function testNow(): void
     {
