@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/marvin255/in-memory-cache/workflows/marvin255_in_memory_cache/badge.svg)](https://github.com/marvin255/in-memory-cache/actions?query=workflow%3A%22marvin255_in_memory_cache%22)
 
-Simple [PSR-16](https://www.php-fig.org/psr/psr-16/) implementation which uses internal array to store data.
+Simple [PSR-16](https://www.php-fig.org/psr/psr-16/) implementation that uses an internal array to store data.
 
 
 
