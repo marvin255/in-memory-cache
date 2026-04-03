@@ -474,6 +474,48 @@ final class InMemoryCacheTest extends BaseCase
         );
     }
 
+    public function testGetDateIntervalWithDays(): void
+    {
+        $key = 'test';
+        $value = 'test value';
+        $ttl = new \DateInterval('P1D');
+        $timestamp = 123;
+
+        $clockMock = $this->createClockMock(
+            [
+                $timestamp,
+                $timestamp + 86400 + 1,
+            ]
+        );
+
+        $cache = new InMemoryCache(clock: $clockMock);
+        $cache->set($key, $value, $ttl);
+        $res = $cache->get($key, null);
+
+        $this->assertNull($res, 'Value should expire after 1 day with DateInterval P1D');
+    }
+
+    public function testGetDateIntervalWithMonths(): void
+    {
+        $key = 'test';
+        $value = 'test value';
+        $ttl = new \DateInterval('P1M');
+        $timestamp = 123;
+
+        $clockMock = $this->createClockMock(
+            [
+                $timestamp,
+                $timestamp + 86400 * 31 + 1,
+            ]
+        );
+
+        $cache = new InMemoryCache(clock: $clockMock);
+        $cache->set($key, $value, $ttl);
+        $res = $cache->get($key, null);
+
+        $this->assertNull($res, 'Value should expire after 1 month with DateInterval P1M');
+    }
+
     /**
      * @param int[] $freezeAt
      */
