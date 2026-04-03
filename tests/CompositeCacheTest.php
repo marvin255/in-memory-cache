@@ -20,10 +20,12 @@ final class CompositeCacheTest extends BaseCase
         $default = 'default';
 
         $light = $this->createCacheInterfaceMock();
-        $light->method('has')
+        $light->expects($this->once())
+            ->method('has')
             ->with($this->equalTo($key))
             ->willReturn(true);
-        $light->method('get')
+        $light->expects($this->once())
+            ->method('get')
             ->with(
                 $this->equalTo($key),
                 $this->equalTo($default)
@@ -169,7 +171,8 @@ final class CompositeCacheTest extends BaseCase
                     [$key1, true],
                 ]
             );
-        $light->method('get')
+        $light->expects($this->once())
+        ->method('get')
             ->with($this->equalTo($key1), $this->equalTo($default))
             ->willReturn($value1);
         $light->expects($this->once())
@@ -180,7 +183,8 @@ final class CompositeCacheTest extends BaseCase
             );
 
         $heavy = $this->createCacheInterfaceMock();
-        $heavy->method('get')
+        $heavy->expects($this->once())
+            ->method('get')
             ->with(
                 $this->equalTo($key),
                 $this->equalTo($default)
@@ -261,7 +265,8 @@ final class CompositeCacheTest extends BaseCase
         $key = 'key';
 
         $light = $this->createCacheInterfaceMock();
-        $light->method('has')
+        $light->expects($this->once())
+            ->method('has')
             ->with($this->equalTo($key))
             ->willReturn(true);
 
@@ -282,12 +287,14 @@ final class CompositeCacheTest extends BaseCase
         $key = 'key';
 
         $light = $this->createCacheInterfaceMock();
-        $light->method('has')
+        $light->expects($this->once())
+            ->method('has')
             ->with($this->equalTo($key))
             ->willReturn(false);
 
         $heavy = $this->createCacheInterfaceMock();
-        $heavy->method('has')
+        $heavy->expects($this->once())
+            ->method('has')
             ->with($this->equalTo($key))
             ->willReturn(true);
 
@@ -302,12 +309,14 @@ final class CompositeCacheTest extends BaseCase
         $key = 'key';
 
         $light = $this->createCacheInterfaceMock();
-        $light->method('has')
+        $light->expects($this->once())
+            ->method('has')
             ->with($this->equalTo($key))
             ->willReturn(false);
 
         $heavy = $this->createCacheInterfaceMock();
-        $heavy->method('has')
+        $heavy->expects($this->once())
+            ->method('has')
             ->with($this->equalTo($key))
             ->willReturn(false);
 
