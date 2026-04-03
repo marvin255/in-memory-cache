@@ -141,12 +141,14 @@ final class InMemoryCache implements CacheInterface
      */
     private function createValidTill(int|\DateInterval|null $ttl): int
     {
-        $validTill = $this->clock->now()->getTimestamp();
+        $now = $this->clock->now();
+        $validTill = $now->getTimestamp();
 
         if ($ttl === null) {
             $validTill += $this->defaultTTL;
         } elseif ($ttl instanceof \DateInterval) {
-            $validTill += $ttl->s;
+            $futureTime = $now->add($ttl);
+            $validTill = $futureTime->getTimestamp();
         } else {
             $validTill += $ttl;
         }
